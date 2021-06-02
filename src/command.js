@@ -2,9 +2,6 @@ const { Message } = require("discord.js");
 const main = require("../index");
 
 const cmd = {
-  /**
-   * @param {Message} m
-   */
   help: {
     desc: "도움말❔",
     exec: (m) => {
@@ -17,7 +14,7 @@ const cmd = {
         } else {
           content += "\n";
         }
-        content += `!${cmdName} : ${cmd[cmdName].desc || cmdName + " 설명"}`;
+        content += `!${cmdName}\t:\t${cmd[cmdName].desc || cmdName + " 설명"}`;
       }
 
       sendDM(content, m);
@@ -38,83 +35,90 @@ const cmd = {
     exec: (m) => {
       let args = getArgs(m);
       if (args && args.length > 1) {
-        let temp = [];
+        args.sort((a, b) => 0.5 - Math.random());
+
         for (let i = 0; i < args.length; i++) {
-          let dice = Math.trunc(Math.random() * args.length);
-          if (temp[dice]) i--;
-          else temp[dice] = `${dice + 1} : ` + args[i];
+          args[i] = `${i + 1} : ` + args[i];
         }
 
-        reply("사다리 결과\n" + temp.join("\n"), m);
+        reply("사다리 결과\n" + args.join("\n"), m);
       } else reply("띄어서 항목을 추가 해주세요.", m);
     },
   },
 
-  회랑: {
-    desc: "태양의 회랑 가실분",
+  카던: {
+    desc: "카오스 던전 가실 분",
     /**
-     *
      * @param {Message} m
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("태양의 회랑 가실분", m, (m2) => {
+      reply("카오스 던전 가실 분", m, (m2) => {
+        react("✋", m2);
+      });
+    },
+  },
+
+  회랑: {
+    desc: "태양의 회랑 가실 분",
+    /**
+     * @param {Message} m
+     */
+    exec: (m) => {
+      deleteMessage(m);
+      reply("태양의 회랑 가실 분", m, (m2) => {
         react("✋", m2);
       });
     },
   },
 
   도레: {
-    desc: "도전 레이드 가실분",
+    desc: "도전 레이드 가실 분",
     /**
-     *
      * @param {Message} m
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("도전 레이드 가실분", m, (m2) => {
+      reply("도전 레이드 가실 분", m, (m2) => {
         react("✋", m2);
       });
     },
   },
 
   쿤겔: {
-    desc: "쿤겔라니움 가실분",
+    desc: "쿤겔라니움 가실 분",
     /**
-     *
      * @param {Message} m
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("쿤겔라니움 가실분", m, (m2) => {
+      reply("쿤겔라니움 가실 분", m, (m2) => {
         react("✋", m2);
       });
     },
   },
 
   데칼: {
-    desc: "데스칼루다 가실분",
+    desc: "데스칼루다 가실 분",
     /**
-     *
      * @param {Message} m
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("데스칼루다 가실분", m, (m2) => {
+      reply("데스칼루다 가실 분", m, (m2) => {
         react("✋", m2);
       });
     },
   },
 
   벨가: {
-    desc: "벨가누스 가실분",
+    desc: "벨가누스 가실 분",
     /**
-     *
      * @param {Message} m
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("벨가누스 가실분", m, (m2) => {
+      reply("벨가누스 가실 분", m, (m2) => {
         react("✋", m2);
       });
     },
@@ -128,7 +132,7 @@ const cmd = {
       if (args.length > 1) {
         let key = args[0];
 
-        if (cmd[key]) {
+        if (!key || cmd[key]) {
           reply("추가할 수 없습니다. 😅", m);
         } else {
           let value = args.slice(1).join(" ");
@@ -158,16 +162,18 @@ const cmd = {
   메모목록: {
     desc: "추가된 메모 목록을 확인합니다.",
     exec: (m) => {
+      let temp = [];
       let data = main.getData();
+
       if (data.memo) {
-        let temp = [];
         for (key in data.memo) {
           temp.push(key);
         }
-        reply("메모 목록 : \n" + temp.join(", "), m);
-      } else {
-        reply("존재하지 않습니다. 😅", m);
       }
+
+      temp.length > 0
+        ? reply("메모 목록 : \n" + temp.join(", "), m)
+        : reply("존재하지 않습니다. 😅", m);
     },
   },
 };
