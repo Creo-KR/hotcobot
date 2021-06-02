@@ -65,7 +65,7 @@ const cmd = {
   },
 
   메모: {
-    desc: "메모를 추가 합니다. 📢 !메모 크레오 👍",
+    desc: "메모를 추가하거나 제거 합니다. 📢 !메모 크레오 👍",
     exec: (m) => {
       let args = getArgs(m);
 
@@ -73,7 +73,7 @@ const cmd = {
         let key = args[0];
 
         if (cmd[key]) {
-          reply("등록할 수 없습니다. 😅", m);
+          reply("추가할 수 없습니다. 😅", m);
         } else {
           let value = args.slice(1).join(" ");
 
@@ -82,7 +82,7 @@ const cmd = {
           data.memo[key] = value;
           main.writeData(data);
 
-          reply("등록되었습니다. 😀", m);
+          reply("추가되었습니다. 😀", m);
         }
       } else if (args.length == 1) {
         let key = args[0];
