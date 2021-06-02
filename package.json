@@ -1,0 +1,19 @@
+{
+  "name": "hotcobot",
+  "version": "1.0.0",
+  "description": "LostArk Hotcademy Discord Bot",
+  "private": true,
+  "scripts": {
+    "start": "node src/index",
+    "dev": "nodemon src/index"
+  },
+  "author": "Creo",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^12.5.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "nodemon": "^2.0.7"
+  }
+}
