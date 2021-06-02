@@ -2,6 +2,7 @@ const client = require("../index");
 const config = require("../config.json");
 const command = require("../src/command");
 const { Message } = require("discord.js");
+const main = require("../index");
 
 module.exports = {
   name: "message",
@@ -18,6 +19,12 @@ module.exports = {
       let args = message.content.split(" ");
       let cmd = args[0].replace(/\!/, "");
       if (command[cmd]) command[cmd].exec(message);
+      else {
+        let data = main.getData();
+        if (data.memo[cmd]) {
+          message.reply(data.memo[cmd]);
+        }
+      }
     }
   },
 };

@@ -2,7 +2,7 @@ const fs = require("fs");
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const config = require("./config.json");
-const data = require("./data.json");
+var data = require("./data.json");
 
 const eventFiles = fs
   .readdirSync("./events")
@@ -91,5 +91,6 @@ module.exports.getData = () => {
 
 const writeData = (d) => {
   fs.writeFileSync("./data.json", JSON.stringify(d, undefined, "  "));
+  data = d;
 };
 module.exports.writeData = writeData;

@@ -51,54 +51,51 @@ const cmd = {
   },
 
   회랑: {
-    desc: "",
+    desc: "회랑 가실분",
     /**
      *
      * @param {Message} m
      */
     exec: (m) => {
-      m.react(":raised_hand:");
+      deleteMessage(m);
+      reply("회랑 가실분", m, (m2) => {
+        react("✋", m2);
+      });
     },
   },
 
-  설명: {
-    desc: "설명을 추가 합니다. 📢 !설명 크레오 👍",
+  메모: {
+    desc: "메모를 추가 합니다. 📢 !메모 크레오 👍",
     exec: (m) => {
-      main.data;
-      reply("등록되었습니다. 😀", m);
-    },
-  },
+      let args = getArgs(m);
 
-  크레오: {
-    exec: (m) => {
-      reply("😀", m);
-    },
-  },
+      if (args.length > 1) {
+        let key = args[0];
 
-  연방: {
-    exec: (m) => {
-      reply("핫카데미 샌드백입니다.", m);
-    },
-  },
+        if (cmd[key]) {
+          reply("등록할 수 없습니다. 😅", m);
+        } else {
+          let value = args.slice(1).join(" ");
 
-  암살고기: {
-    exec: (m) => {
-      reply("핫카데미 연방 담당 일진입니다.", m);
-    },
-  },
+          let data = main.getData();
+          if (!data.memo) data.memo = {};
+          data.memo[key] = value;
+          main.writeData(data);
 
-  핫징: {
-    exec: (m) => {
-      reply("핫카데미 그 자체입니다.", m);
-    },
-  },
+          reply("등록되었습니다. 😀", m);
+        }
+      } else if (args.length == 1) {
+        let key = args[0];
 
-  제로백피시방: {
-    exec: (m) => {
-      reply(
-        "\n주소: 경기도 평택시 고덕 여염9길 26 KR4차 지층 1층 고덕헤리움프라자\n영업시간: 24시간 영업\n연락처: 050-71302-8359",
-        m
-      );
+        let data = main.getData();
+        if (data.memo && data.memo[key]) {
+          delete data.memo[key];
+          main.writeData(data);
+          reply("제거되었습니다. 😀", m);
+        } else {
+          reply("존재하지 않습니다. 😅", m);
+        }
+      }
     },
   },
 };
@@ -123,8 +120,13 @@ const sendDM = (content, message) => {
  * @param {any} content
  * @param {Message} message
  */
-const reply = (content, message) => {
-  message.reply(content);
+const reply = (content, message, callback) => {
+  let promise = message.reply(content);
+  if (callback) promise.then((m) => callback(m));
+};
+
+const react = (reaction, message) => {
+  message.react(reaction);
 };
 
 const getArgs = (message) => {
