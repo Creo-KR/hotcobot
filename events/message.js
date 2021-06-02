@@ -22,7 +22,9 @@ module.exports = {
       else {
         let data = main.getData();
         if (data.memo[cmd]) {
-          message.reply(data.memo[cmd]);
+          message.reply(
+            data.memo[cmd].value + ` - <@!${data.memo[cmd].author}>`
+          );
         }
       }
     }
