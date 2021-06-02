@@ -85,13 +85,11 @@ const createChannel = (channels, name, options, callback) => {
   });
 };
 
-const getData = () => {
+module.exports.getData = () => {
   return data;
 };
-module.exports.getData = getData;
 
 const writeData = (d) => {
   fs.writeFileSync("./data.json", JSON.stringify(d, undefined, "  "));
-  data = d;
 };
 module.exports.writeData = writeData;
