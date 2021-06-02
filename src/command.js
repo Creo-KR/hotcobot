@@ -27,6 +27,7 @@ const cmd = {
   reboot: {
     desc: "재부팅",
     exec: (m) => {
+      reply("다시 돌아옵니다.", m);
       process.exit();
     },
   },
