@@ -25,9 +25,9 @@ const cmd = {
   },
 
   reboot: {
-    desc: "재부팅",
+    desc: "핫코봇 재부팅",
     exec: (m) => {
-      m.reply("다시 돌아옵니다.").then(() => {
+      m.reply("다시 돌아옵니다.👀").then(() => {
         process.exit();
       });
     },
@@ -37,17 +37,27 @@ const cmd = {
     desc: "항목을 랜덤하게 나열 합니다. 📢 !사다리 사과 바나나 포도 딸기",
     exec: (m) => {
       let args = getArgs(m);
-      console.log(args);
       if (args && args.length > 1) {
         let temp = [];
         for (let i = 0; i < args.length; i++) {
           let dice = Math.trunc(Math.random() * args.length);
           if (temp[dice]) i--;
-          else temp[dice] = `${dice + 1} : ` + args[i];
+          else temp[dice] = `${dice + 1} : ` + args[i] + "\n";
         }
 
-        reply(temp.join(", "), m);
+        reply("사다리 결과\n" + temp.join(", "), m);
       } else reply("띄어 쓰기로 항목을 추가 해주세요.", m);
+    },
+  },
+
+  회랑: {
+    desc: "",
+    /**
+     *
+     * @param {Message} m
+     */
+    exec: (m) => {
+      m.react(":raised_hand:");
     },
   },
 
