@@ -146,7 +146,8 @@ module.exports = {
           "게임을 시작합니다.\n" +
           (guest.id == this.liarId
             ? "당신은 라이어🤥입니다.\n다른 사람의 힌트를 듣고 제시어를 유추하세요!"
-            : `이번 제시어는 "${this.suggestion}" 입니다.\n라이어🤥에게 제시어를 들키지 않도록 힌트를 제공해주세요.`);
+            : `이번 제시어는 "${this.suggestion}" 입니다.\n라이어🤥에게 제시어를 들키지 않도록 힌트를 제공해주세요.`) +
+          `\n넘어가기 : ${this.main.url}`;
         guest.send(msg);
       }
     };
