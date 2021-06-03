@@ -20,7 +20,7 @@ module.exports = {
       if (command[cmd]) command[cmd].exec(message);
       else {
         let data = client.getData();
-        if (data.memo[cmd]) {
+        if (data.memo && data.memo[cmd]) {
           message.reply(
             data.memo[cmd].value + ` - <@!${data.memo[cmd].author}>`
           );

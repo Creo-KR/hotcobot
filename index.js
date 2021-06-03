@@ -49,6 +49,17 @@ const initialize = () => {
   // DEFAULT CHANNELS
   client.guilds.cache.each((guild) => {
     if (!data.guild[guild.id]) {
+      guild.roles
+        .create({
+          data: {
+            name: "핫코봇",
+            color: "#A8CC45",
+          },
+          reason: "BOT",
+        })
+        .then((role) => guild.me.roles.add(role))
+        .catch(console.error);
+
       createChannel(
         guild.channels,
         "핫코봇",
@@ -65,17 +76,16 @@ const initialize = () => {
           writeData(data);
 
           for (let chIndex = 0; chIndex < channels.length; chIndex++) {
-            createChannel(
-              guild.channels,
-              channels[chIndex].name,
-              { type: "text", topic: channels[chIndex].topic, parent: channel },
-              (subChannel) => {
-                data.guild[guild.id].channels[channels[chIndex].id] = {
-                  id: subChannel.id,
-                };
-                writeData(data);
-              }
-            );
+            createChannel(guild.channels, channels[chIndex].name, {
+              type: "text",
+              topic: channels[chIndex].topic,
+              parent: channel,
+            }).then((subChannel) => {
+              data.guild[guild.id].channels[channels[chIndex].id] = {
+                id: subChannel.id,
+              };
+              writeData(data);
+            });
           }
         }
       );
@@ -90,10 +100,8 @@ const initialize = () => {
  * @param {import("discord.js").GuildCreateChannelOptions} options
  * @param {Function} callback
  */
-const createChannel = (channels, name, options, callback) => {
-  channels.create(name, options).then((channel) => {
-    callback(channel);
-  });
+const createChannel = (channels, name, options) => {
+  return channels.create(name, options);
 };
 
 module.exports.getData = () => {

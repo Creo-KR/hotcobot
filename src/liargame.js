@@ -280,7 +280,7 @@ module.exports = {
 
         if (isSame) {
           // 동률일 때
-          this.canVote = false;
+          this.canVote = true;
 
           this.voteUser = {};
           this.voteCnt = 0;
