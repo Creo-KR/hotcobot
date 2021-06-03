@@ -197,8 +197,6 @@ module.exports = {
     };
 
     this.vote = (m, idx) => {
-      console.log(m);
-
       let userId = m.author.id;
       // 투표 하는 시간 아닐 때
       if (!this.canVote) {
@@ -238,7 +236,9 @@ module.exports = {
         return;
       }
 
-      m.reply(prefix + "해당 번호로 투표했습니다.");
+      m.reply(
+        `${prefix}해당 번호로 투표했습니다.\n넘어가기 : ${this.main.url}`
+      );
 
       this.voteMap[idx]++;
       this.voteUser[userId] = 1;
@@ -268,7 +268,6 @@ module.exports = {
 
         for (let i = 0; i < this.guests.length; i++) {
           let score = this.voteMap[i + 1];
-          this.voteMap[i + 1] = 0;
 
           if (max == score) isSame = true;
           else if (max < score) {
@@ -276,6 +275,8 @@ module.exports = {
             max = score;
             this.voter = i;
           }
+
+          this.voteMap[i + 1] = 0;
         }
 
         if (isSame) {
@@ -299,6 +300,7 @@ module.exports = {
 
           msg += `투표 완료 : ${this.voteCnt}명`;
         } else {
+          // 투표 종료
           isEnd = true;
           msg += `투표가 완료되었습니다.\n최다 득표를 얻은 참여자는 <@!${
             this.guests[this.voter].id
