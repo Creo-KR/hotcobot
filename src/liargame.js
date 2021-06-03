@@ -99,7 +99,7 @@ module.exports = {
         this.main.edit(
           `<@!${this.host.id}>, 라이어 게임 참가자를 모집합니다.\n최소 3명 이상 시작이 가능합니다.`
         );
-        //return;
+        return;
       }
 
       this.button.join.users.fetch().then((map) => {
@@ -218,7 +218,7 @@ module.exports = {
       // 본인 인지
       if (this.guests[idx - 1].id == userId) {
         m.reply(prefix + "본인을 투표할 수 없습니다.");
-        //return;
+        return;
       }
 
       // 게임 참여자인지
