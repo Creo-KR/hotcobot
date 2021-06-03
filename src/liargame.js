@@ -184,7 +184,9 @@ module.exports = {
         for (let i = 0; i < this.guests.length; i++) {
           let guest = this.guests[i];
           msg += `${i + 1} : <@!${guest.id}>\n`;
-          guest.send(prefix + "이 곳에서 투표를 참여해주세요. 📢 !라이어 번호");
+          guest.send(
+            `${prefix}이 곳에서 투표를 참여해주세요. 📢 !라이어 번호\n넘어가기 : ${this.main.url}`
+          );
         }
 
         msg += "투표 완료 : 0명";
