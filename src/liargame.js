@@ -314,7 +314,7 @@ module.exports = {
       this.main.edit(
         `${prefix}이번 제시어는 ${this.suggestion} 였습니다!!\n그렇다면 라이어🤥는?`
       );
-      this.main.react("🕴");
+      this.main.react("🤥");
     };
 
     this.end = () => {
