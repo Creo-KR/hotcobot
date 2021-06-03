@@ -107,7 +107,7 @@ module.exports = {
 
         for (let i = 0; i < arr.length; i++) {
           this.guests.push(arr[i]);
-          this.voteMap[i + 1 + ""] = 0;
+          this.voteMap[i + 1] = 0;
         }
 
         this.setLiar();
@@ -240,7 +240,7 @@ module.exports = {
         `${prefix}해당 번호로 투표했습니다.\n넘어가기 : ${this.main.url}`
       );
 
-      this.voteMap[idx]++;
+      this.voteMap[idx * 1] += 1;
       this.voteUser[userId] = 1;
       this.voteCnt++;
 
