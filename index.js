@@ -22,6 +22,17 @@ client.once("ready", () => {
   console.log(`${client.user.tag}으로 로그인 합니다.`);
   client.user.setActivity("!help 명령어 확인", { type: "WATCHING" });
 
+  if (data.rebootMessage) {
+    client.channels.fetch(data.rebootMessage.channelID).then((ch) => {
+      ch.messages.fetch(data.rebootMessage.id).then((m) => {
+        m.edit("돌아왔습니다.🤖");
+        delete data.rebootMessage;
+
+        writeData(data);
+      });
+    });
+  }
+
   initialize();
 });
 

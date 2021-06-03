@@ -28,7 +28,11 @@ const cmd = {
   reboot: {
     desc: "핫코봇 재부팅",
     exec: (m) => {
-      m.reply("다시 돌아옵니다. 👀").then(() => {
+      m.reply("다시 돌아옵니다. 👀").then((m2) => {
+        let data = client.getData();
+        data.rebootMessage = { channelID: m2.channel.id, id: m2.id };
+        client.writeData(data);
+
         process.exit();
       });
     },
