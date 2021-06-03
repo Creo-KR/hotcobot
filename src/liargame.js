@@ -97,7 +97,7 @@ module.exports = {
       // 진행 인원 3명 이상
       if (this.button.join.count < 3) {
         this.main.edit(
-          `<@!${this.host.id}>, 라이어 게임 참가자를 모집합니다.\n최소 3명 이상 시작이 가능합니다.`
+          `<@!${this.host.id}>, 🤥라이어 게임 참가자를 모집합니다.\n참가자가 최소 3명 이상이 되어야 시작이 가능합니다.`
         );
         return;
       }
@@ -145,8 +145,8 @@ module.exports = {
           prefix +
           "게임을 시작합니다.\n" +
           (guest.id == this.liarId
-            ? "당신은 라이어입니다.\n다른 사람의 힌트를 듣고 제시어를 유추하세요!"
-            : `이번 제시어는 "${this.suggestion}" 입니다.\n라이어에게 제시어를 들키지 않도록 힌트를 제공해주세요.`);
+            ? "당신은 라이어🤥입니다.\n다른 사람의 힌트를 듣고 제시어를 유추하세요!"
+            : `이번 제시어는 "${this.suggestion}" 입니다.\n라이어🤥에게 제시어를 들키지 않도록 힌트를 제공해주세요.`);
         guest.send(msg);
       }
     };
@@ -180,7 +180,7 @@ module.exports = {
         this.button.next.remove();
 
         let msg =
-          "이제 라이어로 의심되는 사람을 투표합니다.\n핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호\n";
+          "이제 라이어🤥로 의심되는 사람을 투표합니다.\n핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호\n";
         for (let i = 0; i < this.guests.length; i++) {
           let guest = this.guests[i];
           msg += `${i + 1} : <@!${guest.id}>\n`;
@@ -248,7 +248,7 @@ module.exports = {
       if (this.guests.length > this.voteCnt) {
         // 투표 중
         msg +=
-          "이제 라이어로 의심되는 사람을 투표합니다.\n핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호\n";
+          "이제 라이어🤥로 의심되는 사람을 투표합니다.\n핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호\n";
 
         for (let i = 0; i < this.guests.length; i++) {
           let guest = this.guests[i];
