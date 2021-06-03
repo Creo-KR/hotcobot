@@ -1,5 +1,9 @@
 const { Message } = require("discord.js");
-const main = require("../index");
+const client = require("../index");
+
+const LiarGame = require("./liargame");
+
+let game = null;
 
 const cmd = {
   help: {
@@ -46,6 +50,31 @@ const cmd = {
     },
   },
 
+  라이어게임: {
+    desc: "🤥라이어 게임을 시작합니다.",
+    exec: (m) => {
+      game = LiarGame.new(m.author);
+
+      reply("🤥라이어 게임 참가자를 모집합니다.", m).then((m2) => {
+        game.initialize(m2);
+      });
+    },
+  },
+
+  라이어: {
+    desc: "라이어🤥를 투표합니다.",
+    exec: (m) => {
+      if (game && game.type == "LiarGame") {
+        if (m.channel.type == "dm") {
+          let args = getArgs(m);
+          game.vote(m, args[0]);
+        } else {
+          m.delete();
+        }
+      }
+    },
+  },
+
   카던: {
     desc: "카오스 던전 가실 분",
     /**
@@ -53,7 +82,7 @@ const cmd = {
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("카오스 던전 가실 분", m, (m2) => {
+      reply("카오스 던전 가실 분", m).then((m2) => {
         react("✋", m2);
       });
     },
@@ -66,7 +95,7 @@ const cmd = {
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("태양의 회랑 가실 분", m, (m2) => {
+      reply("태양의 회랑 가실 분", m).then((m2) => {
         react("✋", m2);
       });
     },
@@ -79,7 +108,7 @@ const cmd = {
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("도전 레이드 가실 분", m, (m2) => {
+      reply("도전 레이드 가실 분", m).then((m2) => {
         react("✋", m2);
       });
     },
@@ -92,7 +121,7 @@ const cmd = {
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("쿤겔라니움 가실 분", m, (m2) => {
+      reply("쿤겔라니움 가실 분", m).then((m2) => {
         react("✋", m2);
       });
     },
@@ -105,7 +134,7 @@ const cmd = {
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("데스칼루다 가실 분", m, (m2) => {
+      reply("데스칼루다 가실 분", m).then((m2) => {
         react("✋", m2);
       });
     },
@@ -118,7 +147,7 @@ const cmd = {
      */
     exec: (m) => {
       deleteMessage(m);
-      reply("벨가누스 가실 분", m, (m2) => {
+      reply("벨가누스 가실 분", m).then((m2) => {
         react("✋", m2);
       });
     },
@@ -137,20 +166,20 @@ const cmd = {
         } else {
           let value = args.slice(1).join(" ");
 
-          let data = main.getData();
+          let data = client.getData();
           if (!data.memo) data.memo = {};
           data.memo[key] = { value, author: m.author.id };
-          main.writeData(data);
+          client.writeData(data);
 
           reply("추가되었습니다. 😀", m);
         }
       } else if (args.length == 1) {
         let key = args[0];
 
-        let data = main.getData();
+        let data = client.getData();
         if (data.memo && data.memo[key]) {
           delete data.memo[key];
-          main.writeData(data);
+          client.writeData(data);
           reply("제거되었습니다. 😀", m);
         } else {
           reply("존재하지 않습니다. 😅", m);
@@ -163,7 +192,7 @@ const cmd = {
     desc: "추가된 메모 목록을 확인합니다.",
     exec: (m) => {
       let temp = [];
-      let data = main.getData();
+      let data = client.getData();
 
       if (data.memo) {
         for (key in data.memo) {
@@ -182,7 +211,7 @@ const cmd = {
  * @param {Message} message
  */
 const deleteMessage = (message) => {
-  message.delete().catch(() => {});
+  return message.delete().catch(() => {});
 };
 
 /**
@@ -191,20 +220,19 @@ const deleteMessage = (message) => {
  */
 const sendDM = (content, message) => {
   let sender = message.author;
-  sender.send(content).catch(console.error);
+  return sender.send(content).catch(console.error);
 };
 
 /**
  * @param {*} content
  * @param {Message} message
  */
-const reply = (content, message, callback) => {
-  let promise = message.reply(content);
-  if (callback) promise.then((m) => callback(m));
+const reply = (content, message) => {
+  return message.reply(content);
 };
 
 const react = (reaction, message) => {
-  message.react(reaction);
+  return message.react(reaction);
 };
 
 const getArgs = (message) => {

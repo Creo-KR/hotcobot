@@ -20,7 +20,7 @@ for (const file of eventFiles) {
 client.once("ready", () => {
   module.exports.user = client.user;
   console.log(`${client.user.tag}으로 로그인 합니다.`);
-  client.user.setActivity("!help 명령어 확인");
+  client.user.setActivity("!help 명령어 확인", { type: "WATCHING" });
 
   initialize();
 });

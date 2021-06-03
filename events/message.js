@@ -2,7 +2,6 @@ const client = require("../index");
 const config = require("../config.json");
 const command = require("../src/command");
 const { Message } = require("discord.js");
-const main = require("../index");
 
 module.exports = {
   name: "message",
@@ -20,7 +19,7 @@ module.exports = {
       let cmd = args[0].replace(/\!/, "");
       if (command[cmd]) command[cmd].exec(message);
       else {
-        let data = main.getData();
+        let data = client.getData();
         if (data.memo[cmd]) {
           message.reply(
             data.memo[cmd].value + ` - <@!${data.memo[cmd].author}>`
