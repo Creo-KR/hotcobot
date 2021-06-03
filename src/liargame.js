@@ -126,7 +126,7 @@ module.exports = {
       this.guests.sort((a, b) => 0.5 - Math.random());
 
       let liarIdx = Math.trunc(Math.random() * this.guests.length);
-      this.liarId = this.guests[liarIdx];
+      this.liarId = this.guests[liarIdx].id;
     };
 
     this.setSuggestion = () => {
