@@ -1,6 +1,6 @@
-const client = require("../index");
-const config = require("../config.json");
-const command = require("../src/command");
+const client = require("../../index");
+const config = require("../../config.json");
+const command = require("../command");
 const { Message } = require("discord.js");
 
 module.exports = {
@@ -16,7 +16,8 @@ module.exports = {
       message.content.length > 1
     ) {
       let args = message.content.split(" ");
-      let cmd = args[0].replace(/\!/, "");
+      let cmd = args[0].replace(config.prefix, "");
+
       if (command[cmd]) command[cmd].exec(message);
       else {
         let data = client.getData();

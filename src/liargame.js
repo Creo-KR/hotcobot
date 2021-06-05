@@ -1,66 +1,61 @@
 const client = require("../index");
-const { Message } = require("discord.js");
-
-const prefix = "🤥라이어 게임\n";
+const { Message, MessageEmbed } = require("discord.js");
 
 const suggestion = require("./liargame_suggestion.json");
 
 module.exports = {
-  new: (host) => {
-    this.type = "LiarGame";
-    this.main = null;
+  /**
+   * @param {Message} m
+   */
+  new: (m) => {
+    let _this = this;
 
-    this.host = host;
-    this.guests = [];
-    this.liarId = null;
-    this.currentIdx = 0;
+    _this.type = "LiarGame";
+    _this.host = m.author;
 
-    this.canVote = false;
-    this.voteCnt = 0;
-    this.voteMap = { 1: 0 };
-    this.voteUser = {};
-    this.voter = -1;
-
-    this.category = null;
-    this.suggestion = null;
-
-    this.button = {
-      join: null,
-      start: null,
-      next: null,
-      show: null,
-      end: null,
+    _this.main = null;
+    _this.mainTemplate = new MessageEmbed({
+      title: "🤥 라이어 게임",
+      description:
+        "참가자를 모집합니다. ✋ 버튼을 눌러 참가하세요.\n참가자가 모두 모이면 ▶ 버튼을 눌러 시작하세요.",
+      color: 11062341,
+      footer: { text: "•  •", iconURL: _this.host.avatarURL() },
+      timestamp: new Date(),
+    });
+    _this.mainTemplateField = {
+      vote: { name: "🗳️투표 번호", value: null },
+      notice: { name: "❗안내", value: null },
     };
 
-    /**
-     * @param {Message} m
-     */
-    this.initialize = (m) => {
-      this.main = m;
+    m.reply(_this.mainTemplate).then((m2) => {
+      _this.main = m2;
 
-      let collector = m.createReactionCollector((r, u) => true);
+      let collector = _this.main.createReactionCollector((r, u) => true);
 
       collector.on("collect", (r, u) => {
         if (u.id !== client.user.id) {
           //USER
           switch (r.emoji.name) {
             case "✋":
-              if (host.id == u.id) r.users.remove(u);
+              if (_this.host.id == u.id) r.users.remove(u);
               break;
             case "▶":
-              if (host.id == u.id) this.start();
+              if (_this.host.id == u.id) _this.start();
               r.users.remove(u);
               break;
             case "⏩":
-              if (u.id == this.guests[this.currentIdx].id) this.next(u);
+              if (u.id == _this.guests[_this.currentIdx].id) _this.next(u);
               r.users.remove(u);
               break;
             case "🕵️‍♂️":
-              if (u.id == this.guests[this.voter].id) this.show();
+              if (u.id == _this.guests[_this.voter].id) _this.show();
               r.users.remove(u);
               break;
             case "🤥":
-              this.end();
+              _this.end();
+              break;
+            case "🔄":
+              _this.restart(u);
               break;
             default:
               r.remove();
@@ -69,266 +64,388 @@ module.exports = {
           //BOT
           switch (r.emoji.name) {
             case "✋":
-              this.button.join = r;
+              _this.button.join = r;
               break;
             case "▶":
-              this.button.start = r;
+              _this.button.start = r;
               break;
             case "⏩":
-              this.button.next = r;
+              _this.button.next = r;
               break;
             case "🕵️‍♂️":
-              this.button.show = r;
+              _this.button.show = r;
               break;
             case "🤥":
-              this.button.end = r;
+              _this.button.end = r;
+              break;
+            case "🔄":
+              this.button.restart = r;
               break;
           }
         }
       });
 
-      m.react("✋");
-      m.react("▶");
+      _this.initialize();
+    });
+
+    _this.initialize = () => {
+      _this.guests = [];
+      _this.liarId = null;
+      _this.currentIdx = 0;
+
+      _this.canVote = false;
+      _this.voteCnt = 0;
+      _this.voteMap = { 1: 0 };
+      _this.voteUser = {};
+      _this.voter = -1;
+      _this.liarVoteUser = [];
+
+      _this.category = null;
+      _this.suggestion = null;
+
+      _this.button = {
+        join: null,
+        start: null,
+        next: null,
+        show: null,
+        end: null,
+        restart: null,
+      };
+
+      _this.main.react("✋");
+      _this.main.react("▶");
     };
 
-    this.start = () => {
-      this.guests.push(this.host);
+    _this.setField = (name, value) => {
+      _this.mainTemplateField[name].value = value;
+    };
+
+    _this.applyTemplate = () => {
+      let fields = [];
+      for (f in _this.mainTemplateField) {
+        if (_this.mainTemplateField[f].value) {
+          fields.push({
+            name: _this.mainTemplateField[f].name,
+            value: _this.mainTemplateField[f].value,
+          });
+        }
+      }
+
+      _this.mainTemplate.fields = fields;
+
+      _this.mainTemplate.setTimestamp(new Date());
+
+      return _this.main.edit(_this.mainTemplate);
+    };
+
+    _this.start = () => {
+      _this.guests.push(_this.host);
 
       // 진행 인원 3명 이상
-      if (this.button.join.count < 3) {
-        this.main.edit(
-          `<@!${this.host.id}>, 🤥라이어 게임 참가자를 모집합니다.\n참가자가 최소 3명 이상이 되어야 시작이 가능합니다.`
+      if (_this.button.join.count < 3) {
+        _this.setField(
+          "notice",
+          "참가자가 최소 3명 이상이 되어야 시작이 가능합니다."
         );
+
+        _this.applyTemplate();
         return;
       }
 
-      this.button.join.users.fetch().then((map) => {
+      _this.button.join.users.fetch().then((map) => {
         let arr = map.filter((u) => u.id != client.user.id).map((u) => u);
 
         for (let i = 0; i < arr.length; i++) {
-          this.guests.push(arr[i]);
-          this.voteMap[i + 1] = 0;
+          _this.guests.push(arr[i]);
+          _this.voteMap[i + 1] = 0;
         }
 
-        this.setLiar();
-        this.setSuggestion();
-        this.sendSuggestion();
-        this.setFirst();
+        _this.setLiar();
+        _this.setSuggestion();
+        _this.sendSuggestion();
+        _this.setFirst();
       });
 
-      this.button.join.remove();
-      this.button.start.remove();
+      _this.button.join.remove();
+      _this.button.start.remove();
 
-      this.main.edit(prefix + "지금 시작 합니다. 참가자에게 제시어 전달 중...");
+      _this.mainTemplate.setDescription(
+        "지금 시작 합니다. 참가자에게 제시어 전달 중..."
+      );
+
+      _this.setField("notice");
+
+      _this.applyTemplate();
     };
 
-    this.setLiar = () => {
-      this.guests.sort((a, b) => 0.5 - Math.random());
+    _this.setLiar = () => {
+      _this.guests.sort((a, b) => 0.5 - Math.random());
 
-      let liarIdx = Math.trunc(Math.random() * this.guests.length);
-      this.liarId = this.guests[liarIdx].id;
+      let liarIdx = Math.trunc(Math.random() * _this.guests.length);
+      _this.liarId = _this.guests[liarIdx].id;
     };
 
-    this.setSuggestion = () => {
+    _this.setSuggestion = () => {
       let cateIdx = Math.trunc(Math.random() * suggestion.length);
-      this.category = suggestion[cateIdx].category;
+      _this.category = suggestion[cateIdx].category;
       let suggIdx = Math.trunc(
         Math.random() * suggestion[cateIdx].suggestions.length
       );
-      this.suggestion = suggestion[cateIdx].suggestions[suggIdx];
+      _this.suggestion = suggestion[cateIdx].suggestions[suggIdx];
     };
 
-    this.sendSuggestion = () => {
-      for (let i = 0; i < this.guests.length; i++) {
-        let guest = this.guests[i];
+    _this.sendSuggestion = () => {
+      for (let i = 0; i < _this.guests.length; i++) {
+        let guest = _this.guests[i];
         let msg =
-          prefix +
           "게임을 시작합니다.\n" +
-          (guest.id == this.liarId
+          (guest.id == _this.liarId
             ? "당신은 라이어🤥입니다.\n다른 사람의 힌트를 듣고 제시어를 유추하세요!"
-            : `이번 제시어는 "${this.suggestion}" 입니다.\n라이어🤥에게 제시어를 들키지 않도록 힌트를 제공해주세요.`) +
-          `\n넘어가기 : ${this.main.url}`;
+            : `이번 제시어는 "${_this.suggestion}" 입니다.\n라이어🤥에게 제시어를 들키지 않도록 힌트를 제공해주세요.`) +
+          `\n넘어가기 : ${_this.main.url}`;
         guest.send(msg);
       }
     };
 
-    this.setFirst = () => {
-      this.main.edit(
-        `${prefix}이번 주제는 "${this.category}" 입니다.\n <@!${
-          this.guests[this.currentIdx].id
-        }> 님부터 진행합니다.\n힌트를 말하고 다음 버튼을 눌러주세요.`
+    _this.setFirst = () => {
+      _this.mainTemplate.setDescription(
+        `이번 주제는 \`${_this.category}\` 입니다.\n<@!${
+          _this.guests[_this.currentIdx].id
+        }> 님부터 진행합니다.`
       );
-      this.main.react("⏩");
+
+      _this.setField(
+        "notice",
+        "한 사람씩 제시어에 대한 힌트를 말하고 ⏩ 버튼을 눌러주세요."
+      );
+
+      _this.applyTemplate();
+
+      _this.main.react("⏩");
     };
 
-    this.next = (u) => {
+    _this.next = (u) => {
       // 차례 확인
-      if (u.id != this.guests[this.currentIdx].id) {
+      if (u.id != _this.guests[_this.currentIdx].id) {
         return;
       }
 
-      if (this.guests.length > this.currentIdx + 1) {
-        this.currentIdx++;
-        this.main.edit(
-          `${prefix}이번 주제는 "${this.category}" 입니다.\n이번 차례는 <@!${
-            this.guests[this.currentIdx].id
-          }> 님입니다.\n힌트를 말하고 다음 버튼을 눌러주세요.`
+      if (_this.guests.length > _this.currentIdx + 1) {
+        _this.currentIdx++;
+
+        _this.mainTemplate.setDescription(
+          `이번 주제는 \`${_this.category}\` 입니다.\n이번 차례는 <@!${
+            _this.guests[_this.currentIdx].id
+          }> 님입니다.`
         );
+
+        _this.applyTemplate();
       } else {
         // 힌트 끝
-        this.canVote = true;
+        _this.canVote = true;
 
-        this.button.next.remove();
+        _this.button.next.remove();
 
-        let msg =
-          "이제 라이어🤥로 의심되는 사람을 투표합니다.\n핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호\n";
-        for (let i = 0; i < this.guests.length; i++) {
-          let guest = this.guests[i];
-          msg += `${i + 1} : <@!${guest.id}>\n`;
+        _this.mainTemplate.setDescription(
+          "이제 라이어🤥로 의심되는 사람을 투표합니다.\n투표 완료 : 0명"
+        );
+
+        let guestList = "";
+        for (let i = 0; i < _this.guests.length; i++) {
+          let guest = _this.guests[i];
+          guestList += `${i + 1} : <@!${guest.id}>\n`;
           guest.send(
-            `${prefix}이 곳에서 투표를 참여해주세요. 📢 !라이어 번호\n넘어가기 : ${this.main.url}`
+            `이 곳에서 투표를 참여해주세요. 📢 !라이어 번호\n넘어가기 : ${_this.main.url}`
           );
         }
 
-        msg += "투표 완료 : 0명";
+        _this.setField("vote", guestList);
 
-        this.main.edit(prefix + msg);
+        _this.setField(
+          "notice",
+          "핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호"
+        );
+
+        _this.applyTemplate();
       }
     };
 
-    this.vote = (m, idx) => {
+    _this.vote = (m, idx) => {
       let userId = m.author.id;
       // 투표 하는 시간 아닐 때
-      if (!this.canVote) {
-        m.reply(prefix + "지금은 투표할 수 없습니다.");
+      if (!_this.canVote) {
+        m.reply("지금은 투표할 수 없습니다.");
         return;
       }
 
       // 투표 참여 여부
-      if (this.voteUser[userId]) {
-        m.reply(prefix + "이미 투표에 참여하였습니다.");
+      if (_this.voteUser[userId]) {
+        m.reply("이미 투표에 참여하였습니다.");
         return;
       }
 
       // 유효한 숫자인지
-      if (idx * 1 < 1 || idx * 1 > this.guests.length) {
-        m.reply(prefix + "유효하지 않은 번호입니다.");
+      if (idx * 1 < 1 || idx * 1 > _this.guests.length) {
+        m.reply("유효하지 않은 번호입니다.");
         return;
       }
 
       // 본인 인지
-      if (this.guests[idx - 1].id == userId) {
-        m.reply(prefix + "본인을 투표할 수 없습니다.");
+      if (_this.guests[idx - 1].id == userId) {
+        m.reply("본인을 투표할 수 없습니다.");
         return;
       }
 
       // 게임 참여자인지
       let isGuest = false;
-      for (let i = 0; i < this.guests.length; i++) {
-        if (this.guests[i].id == userId) {
+      for (let i = 0; i < _this.guests.length; i++) {
+        if (_this.guests[i].id == userId) {
           isGuest = true;
           break;
         }
       }
 
       if (!isGuest) {
-        m.reply(prefix + "게임 참여자만 투표할 수 있습니다.");
+        m.reply("게임 참여자만 투표할 수 있습니다.");
         return;
       }
 
-      m.reply(
-        `${prefix}해당 번호로 투표했습니다.\n넘어가기 : ${this.main.url}`
-      );
+      m.reply(`해당 번호로 투표했습니다.\n넘어가기 : ${_this.main.url}`);
 
-      this.voteMap[idx * 1] += 1;
-      this.voteUser[userId] = 1;
-      this.voteCnt++;
+      _this.voteMap[idx * 1] += 1;
+      _this.voteUser[userId] = 1;
+      _this.voteCnt++;
 
-      let msg = "";
+      if (_this.guests[idx - 1].id == _this.liarId)
+        _this.liarVoteUser.push(userId);
 
       let isEnd = false;
 
-      if (this.guests.length > this.voteCnt) {
+      if (_this.guests.length > _this.voteCnt) {
         // 투표 중
-        msg +=
-          "이제 라이어🤥로 의심되는 사람을 투표합니다.\n핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호\n";
-
-        for (let i = 0; i < this.guests.length; i++) {
-          let guest = this.guests[i];
-          msg += `${i + 1} : <@!${guest.id}>\n`;
-        }
-
-        msg += `투표 완료 : ${this.voteCnt}명`;
+        _this.mainTemplate.setDescription(
+          `이제 라이어🤥로 의심되는 사람을 투표합니다.\n투표 완료 : ${_this.voteCnt}명`
+        );
       } else {
         // 투표 완료
-        this.canVote = false;
+        _this.canVote = false;
 
         let max = -1;
         let isSame = false;
 
-        for (let i = 0; i < this.guests.length; i++) {
-          let score = this.voteMap[i + 1];
+        for (let i = 0; i < _this.guests.length; i++) {
+          let score = _this.voteMap[i + 1];
 
           if (max == score) isSame = true;
           else if (max < score) {
             isSame = false;
             max = score;
-            this.voter = i;
+            _this.voter = i;
           }
 
-          this.voteMap[i + 1] = 0;
+          _this.voteMap[i + 1] = 0;
         }
 
         if (isSame) {
           // 동률일 때
-          this.canVote = true;
+          _this.canVote = true;
 
-          this.voteUser = {};
-          this.voteCnt = 0;
-          this.voter = -1;
+          _this.voteUser = {};
+          _this.voteCnt = 0;
+          _this.voter = -1;
+          _this.liarVoteUser = [];
 
-          msg +=
-            "투표가 완료되었으나 동률로 재투표를 합니다.\n핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호\n";
+          _this.mainTemplate.setDescription(
+            `이제 라이어🤥로 의심되는 사람을 투표합니다.\n투표 완료 : ${_this.voteCnt}명`
+          );
 
-          for (let i = 0; i < this.guests.length; i++) {
-            let guest = this.guests[i];
-            msg += `${i + 1} : <@!${guest.id}>\n`;
-            guest.send(
-              prefix + "이 곳에서 투표를 참여해주세요. 📢 !라이어 번호"
-            );
+          _this.setField(
+            "notice",
+            `투표가 완료되었으나 동률(${max}표)로 재투표를 합니다.\n핫코봇 DM으로 번호를 보내주세요. 📢 !라이어 번호`
+          );
+
+          for (let i = 0; i < _this.guests.length; i++) {
+            guest.send("이 곳에서 투표를 참여해주세요. 📢 !라이어 번호");
           }
-
-          msg += `투표 완료 : ${this.voteCnt}명`;
         } else {
           // 투표 종료
           isEnd = true;
-          msg += `투표가 완료되었습니다.\n최다 득표를 얻은 참여자는 <@!${
-            this.guests[this.voter].id
-          }>님입니다.\n알고 있는 제시어를 말하고 제시어를 확인해주세요!`;
+
+          _this.mainTemplate.setDescription(
+            `투표가 완료되었습니다.\n최다 득표로 ${max}표를 얻은 참여자는 <@!${
+              _this.guests[_this.voter].id
+            }>님입니다.\n알고 있는 제시어를 말하고 제시어를 확인해주세요!`
+          );
+
+          _this.setField("vote");
+
+          _this.setField(
+            "notice",
+            "최다 득표자는 🕵️‍♂️ 버튼을 눌러 제시어를 확인합니다."
+          );
         }
       }
 
-      this.main.edit(prefix + msg);
+      _this.applyTemplate();
+
       if (isEnd) {
-        this.main.react("🕵️‍♂️");
+        _this.main.react("🕵️‍♂️");
       }
     };
 
-    this.show = () => {
-      this.button.show.remove();
-      this.main.edit(
-        `${prefix}이번 제시어는 ${this.suggestion} 였습니다!!\n그렇다면 라이어🤥는?`
+    _this.show = () => {
+      _this.button.show.remove();
+
+      _this.mainTemplate.setDescription(
+        `이번 제시어는 \`${_this.suggestion}\` 였습니다!!\n그렇다면 라이어🤥는?`
       );
-      this.main.react("🤥");
+
+      _this.setField("notice", "🤥 버튼을 눌러 라이어를 확인합니다.");
+
+      _this.applyTemplate();
+
+      _this.main.react("🤥");
     };
 
-    this.end = () => {
-      this.button.end.remove();
-      this.main.edit(
-        `${prefix}라이어🤥는 <@!${this.liarId}>님입니다!!\n게임을 종료합니다.`
+    _this.end = () => {
+      _this.button.end.remove();
+
+      let rightUser = "";
+      if (_this.liarVoteUser.length > 0) {
+        rightUser += "라이어🤥를 투표한 사람은 ";
+        for (let i = 0; i < _this.liarVoteUser.length; i++) {
+          rightUser += `<@!${_this.liarVoteUser[i]}> `;
+        }
+        rightUser += "입니다.";
+      } else {
+        rightUser =
+          "라이어🤥를 투표한 사람이 없었습니다. 라이어🤥의 완벽한 승리입니다.";
+      }
+
+      _this.mainTemplate.setDescription(
+        `라이어🤥는 <@!${_this.liarId}>님입니다!!\n\n${rightUser}\n게임을 종료합니다.`
       );
+
+      _this.setField("notice", "재시작을 원하면 🔄버튼을 눌러주세요.");
+
+      _this.applyTemplate();
+
+      _this.main.react("🔄");
     };
 
-    return this;
+    _this.restart = (u) => {
+      _this.button.restart.remove();
+
+      _this.mainTemplate.setDescription(
+        "참가자를 모집합니다. ✋ 버튼을 눌러 참가하세요.\n참가자가 모두 모이면 ▶ 버튼을 눌러 시작하세요."
+      );
+      _this.setField("notice");
+      _this.applyTemplate();
+
+      _this.host = u;
+      _this.initialize();
+    };
+
+    return _this;
   },
 };

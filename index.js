@@ -5,11 +5,11 @@ const config = require("./config.json");
 var data = require("./data.json");
 
 const eventFiles = fs
-  .readdirSync("./events")
+  .readdirSync("./src/events")
   .filter((file) => file.endsWith(".js"));
 
 for (const file of eventFiles) {
-  const event = require(`./events/${file}`);
+  const event = require(`./src/events/${file}`);
   if (event.once) {
     client.once(event.name, (...args) => event.exec(...args));
   } else {
@@ -98,7 +98,6 @@ const initialize = () => {
  * @param {Discord.GuildChannelManager} channels
  * @param {string} name
  * @param {import("discord.js").GuildCreateChannelOptions} options
- * @param {Function} callback
  */
 const createChannel = (channels, name, options) => {
   return channels.create(name, options);
