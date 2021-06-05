@@ -27,15 +27,19 @@ module.exports = {
       notice: { name: "❗안내", value: null },
     };
 
-    _this.dmTemplate = new MessageEmbed({
-      title: "🤥 라이어 게임",
-      color: 11062341,
-    });
+    _this.createDmTemplate = (desc) =>
+      new MessageEmbed({
+        title: "🤥 라이어 게임",
+        description: desc,
+        color: 11062341,
+        author: {
+          name: "↩ 돌아가기",
+          url: _this.main.url,
+        },
+      });
 
     m.reply(_this.mainTemplate).then((m2) => {
       _this.main = m2;
-
-      _this.dmTemplate.setAuthor("↩ 돌아가기", undefined, this.main.url);
 
       let collector = _this.main.createReactionCollector((r, u) => true);
 
@@ -205,14 +209,14 @@ module.exports = {
       for (let i = 0; i < _this.guests.length; i++) {
         let guest = _this.guests[i];
 
-        _this.dmTemplate.setDescription(
+        let dmTemplate = createDmTemplate(
           "게임을 시작합니다.\n" +
             (guest.id == _this.liarId
               ? "당신은 `라이어🤥`입니다.\n다른 사람의 힌트를 듣고 제시어를 유추하세요!"
               : `이번 제시어는 \`${_this.suggestion}\` 입니다.\n라이어🤥에게 제시어를 들키지 않도록 힌트를 제공해주세요.`)
         );
 
-        guest.send(_this.dmTemplate);
+        guest.send(dmTemplate);
       }
     };
 
@@ -264,11 +268,11 @@ module.exports = {
           let guest = _this.guests[i];
           guestList += `${i + 1} : <@!${guest.id}>\n`;
 
-          _this.dmTemplate.setDescription(
+          let dmTemplate = createDmTemplate(
             "이 곳에서 투표를 참여해주세요. 📢 !라이어 번호"
           );
 
-          guest.send(_this.dmTemplate);
+          guest.send(dmTemplate);
         }
 
         _this.setField("vote", guestList);
@@ -286,33 +290,33 @@ module.exports = {
       let userId = m.author.id;
       // 투표 하는 시간 아닐 때
       if (!_this.canVote) {
-        _this.dmTemplate.setDescription("지금은 투표할 수 없습니다.");
+        let dmTemplate = createDmTemplate("지금은 투표할 수 없습니다.");
 
-        m.reply(_this.dmTemplate);
+        m.reply(dmTemplate);
         return;
       }
 
       // 투표 참여 여부
       if (_this.voteUser[userId]) {
-        _this.dmTemplate.setDescription("이미 투표에 참여하였습니다.");
+        let dmTemplate = createDmTemplate("이미 투표에 참여하였습니다.");
 
-        m.reply(_this.dmTemplate);
+        m.reply(dmTemplate);
         return;
       }
 
       // 유효한 숫자인지
       if (idx * 1 < 1 || idx * 1 > _this.guests.length) {
-        _this.dmTemplate.setDescription("유효하지 않은 번호입니다.");
+        let dmTemplate = createDmTemplate("유효하지 않은 번호입니다.");
 
-        m.reply(_this.dmTemplate);
+        m.reply(dmTemplate);
         return;
       }
 
       // 본인 인지
       if (_this.guests[idx - 1].id == userId) {
-        _this.dmTemplate.setDescription("본인을 투표할 수 없습니다.");
+        let dmTemplate = createDmTemplate("본인을 투표할 수 없습니다.");
 
-        m.reply(_this.dmTemplate);
+        m.reply(dmTemplate);
         return;
       }
 
@@ -326,15 +330,15 @@ module.exports = {
       }
 
       if (!isGuest) {
-        _this.dmTemplate.setDescription("게임 참여자만 투표할 수 있습니다.");
+        let dmTemplate = createDmTemplate("게임 참여자만 투표할 수 있습니다.");
 
-        m.reply(_this.dmTemplate);
+        m.reply(dmTemplate);
         return;
       }
 
-      _this.dmTemplate.setDescription(`${idx} 번으로 투표했습니다.`);
+      let dmTemplate = createDmTemplate(`${idx} 번으로 투표했습니다.`);
 
-      m.reply(_this.dmTemplate);
+      m.reply(dmTemplate);
 
       _this.voteMap[idx * 1] += 1;
       _this.voteUser[userId] = 1;
