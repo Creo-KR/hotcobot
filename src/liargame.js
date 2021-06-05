@@ -443,6 +443,7 @@ module.exports = {
       _this.applyTemplate();
 
       _this.host = u;
+      _this.mainTemplate.footer.iconURL = u.avatarURL();
       _this.initialize();
     };
 
