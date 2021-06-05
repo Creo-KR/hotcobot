@@ -57,7 +57,9 @@ const cmd = {
   라이어게임: {
     desc: "🤥라이어 게임을 시작합니다.",
     exec: (m) => {
-      game = LiarGame.new(m);
+      if (m.channel.type == "dm") {
+        m.reply("이 곳에서 게임을 시작할 수 없습니다.");
+      } else game = LiarGame.new(m);
     },
   },
 
