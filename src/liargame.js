@@ -27,8 +27,15 @@ module.exports = {
       notice: { name: "❗안내", value: null },
     };
 
+    _this.dmTemplate = new MessageEmbed({
+      title: "🤥 라이어 게임",
+      color: 11062341,
+    });
+
     m.reply(_this.mainTemplate).then((m2) => {
       _this.main = m2;
+
+      _this.dmTemplate.setAuthor("↩ 돌아가기", undefined, this.main.url);
 
       let collector = _this.main.createReactionCollector((r, u) => true);
 
@@ -149,7 +156,7 @@ module.exports = {
         );
 
         _this.applyTemplate();
-        return;
+        //return;
       }
 
       _this.button.join.users.fetch().then((map) => {
@@ -197,13 +204,15 @@ module.exports = {
     _this.sendSuggestion = () => {
       for (let i = 0; i < _this.guests.length; i++) {
         let guest = _this.guests[i];
-        let msg =
+
+        _this.dmTemplate.setDescription(
           "게임을 시작합니다.\n" +
-          (guest.id == _this.liarId
-            ? "당신은 라이어🤥입니다.\n다른 사람의 힌트를 듣고 제시어를 유추하세요!"
-            : `이번 제시어는 "${_this.suggestion}" 입니다.\n라이어🤥에게 제시어를 들키지 않도록 힌트를 제공해주세요.`) +
-          `\n넘어가기 : ${_this.main.url}`;
-        guest.send(msg);
+            (guest.id == _this.liarId
+              ? "당신은 `라이어🤥`입니다.\n다른 사람의 힌트를 듣고 제시어를 유추하세요!"
+              : `이번 제시어는 \`${_this.suggestion}\` 입니다.\n라이어🤥에게 제시어를 들키지 않도록 힌트를 제공해주세요.`)
+        );
+
+        guest.send(_this.dmTemplate);
       }
     };
 
@@ -254,9 +263,12 @@ module.exports = {
         for (let i = 0; i < _this.guests.length; i++) {
           let guest = _this.guests[i];
           guestList += `${i + 1} : <@!${guest.id}>\n`;
-          guest.send(
-            `이 곳에서 투표를 참여해주세요. 📢 !라이어 번호\n넘어가기 : ${_this.main.url}`
+
+          _this.dmTemplate.setDescription(
+            "이 곳에서 투표를 참여해주세요. 📢 !라이어 번호"
           );
+
+          guest.send(_this.dmTemplate);
         }
 
         _this.setField("vote", guestList);
@@ -274,25 +286,33 @@ module.exports = {
       let userId = m.author.id;
       // 투표 하는 시간 아닐 때
       if (!_this.canVote) {
-        m.reply("지금은 투표할 수 없습니다.");
+        _this.dmTemplate.setDescription("지금은 투표할 수 없습니다.");
+
+        m.reply(_this.dmTemplate);
         return;
       }
 
       // 투표 참여 여부
       if (_this.voteUser[userId]) {
-        m.reply("이미 투표에 참여하였습니다.");
+        _this.dmTemplate.setDescription("이미 투표에 참여하였습니다.");
+
+        m.reply(_this.dmTemplate);
         return;
       }
 
       // 유효한 숫자인지
       if (idx * 1 < 1 || idx * 1 > _this.guests.length) {
-        m.reply("유효하지 않은 번호입니다.");
+        _this.dmTemplate.setDescription("유효하지 않은 번호입니다.");
+
+        m.reply(_this.dmTemplate);
         return;
       }
 
       // 본인 인지
       if (_this.guests[idx - 1].id == userId) {
-        m.reply("본인을 투표할 수 없습니다.");
+        _this.dmTemplate.setDescription("본인을 투표할 수 없습니다.");
+
+        m.reply(_this.dmTemplate);
         return;
       }
 
@@ -306,11 +326,15 @@ module.exports = {
       }
 
       if (!isGuest) {
-        m.reply("게임 참여자만 투표할 수 있습니다.");
+        _this.dmTemplate.setDescription("게임 참여자만 투표할 수 있습니다.");
+
+        m.reply(_this.dmTemplate);
         return;
       }
 
-      m.reply(`해당 번호로 투표했습니다.\n넘어가기 : ${_this.main.url}`);
+      _this.dmTemplate.setDescription(`${idx} 번으로 투표했습니다.`);
+
+      m.reply(_this.dmTemplate);
 
       _this.voteMap[idx * 1] += 1;
       _this.voteUser[userId] = 1;
