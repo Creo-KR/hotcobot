@@ -209,7 +209,7 @@ module.exports = {
       for (let i = 0; i < _this.guests.length; i++) {
         let guest = _this.guests[i];
 
-        let dmTemplate = createDmTemplate(
+        let dmTemplate = _this.createDmTemplate(
           "게임을 시작합니다.\n" +
             (guest.id == _this.liarId
               ? "당신은 `라이어🤥`입니다.\n다른 사람의 힌트를 듣고 제시어를 유추하세요!"
@@ -268,7 +268,7 @@ module.exports = {
           let guest = _this.guests[i];
           guestList += `${i + 1} : <@!${guest.id}>\n`;
 
-          let dmTemplate = createDmTemplate(
+          let dmTemplate = _this.createDmTemplate(
             "이 곳에서 투표를 참여해주세요. 📢 !라이어 번호"
           );
 
@@ -290,7 +290,7 @@ module.exports = {
       let userId = m.author.id;
       // 투표 하는 시간 아닐 때
       if (!_this.canVote) {
-        let dmTemplate = createDmTemplate("지금은 투표할 수 없습니다.");
+        let dmTemplate = _this.createDmTemplate("지금은 투표할 수 없습니다.");
 
         m.reply(dmTemplate);
         return;
@@ -298,7 +298,7 @@ module.exports = {
 
       // 투표 참여 여부
       if (_this.voteUser[userId]) {
-        let dmTemplate = createDmTemplate("이미 투표에 참여하였습니다.");
+        let dmTemplate = _this.createDmTemplate("이미 투표에 참여하였습니다.");
 
         m.reply(dmTemplate);
         return;
@@ -306,7 +306,7 @@ module.exports = {
 
       // 유효한 숫자인지
       if (idx * 1 < 1 || idx * 1 > _this.guests.length) {
-        let dmTemplate = createDmTemplate("유효하지 않은 번호입니다.");
+        let dmTemplate = _this.createDmTemplate("유효하지 않은 번호입니다.");
 
         m.reply(dmTemplate);
         return;
@@ -314,7 +314,7 @@ module.exports = {
 
       // 본인 인지
       if (_this.guests[idx - 1].id == userId) {
-        let dmTemplate = createDmTemplate("본인을 투표할 수 없습니다.");
+        let dmTemplate = _this.createDmTemplate("본인을 투표할 수 없습니다.");
 
         m.reply(dmTemplate);
         return;
@@ -330,13 +330,15 @@ module.exports = {
       }
 
       if (!isGuest) {
-        let dmTemplate = createDmTemplate("게임 참여자만 투표할 수 있습니다.");
+        let dmTemplate = _this.createDmTemplate(
+          "게임 참여자만 투표할 수 있습니다."
+        );
 
         m.reply(dmTemplate);
         return;
       }
 
-      let dmTemplate = createDmTemplate(`${idx} 번으로 투표했습니다.`);
+      let dmTemplate = _this.createDmTemplate(`${idx} 번으로 투표했습니다.`);
 
       m.reply(dmTemplate);
 
