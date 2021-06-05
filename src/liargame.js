@@ -168,7 +168,6 @@ module.exports = {
 
         for (let i = 0; i < arr.length; i++) {
           _this.guests.push(arr[i]);
-          _this.voteMap[i + 1] = 0;
         }
 
         _this.setLiar();
@@ -208,6 +207,8 @@ module.exports = {
     _this.sendSuggestion = () => {
       for (let i = 0; i < _this.guests.length; i++) {
         let guest = _this.guests[i];
+
+        _this.voteMap[i + 1] = 0;
 
         let dmTemplate = _this.createDmTemplate(
           "게임을 시작합니다.\n" +
